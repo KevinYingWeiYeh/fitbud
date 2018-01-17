@@ -7,8 +7,8 @@ if (process.env.JAWSDB_URL){
   connection = mysql.createConnection({
     host: process.env.DBSERVER || 'localhost',
     user: process.env.DBUSER || 'root',
-    password: process.env.DBPASSWORD || '',
-    database : 'fitbud'
+    password: process.env.DBPASSWORD || 'root',
+    database : process.env.DBNAME || 'fitbud',
   });
 }
 
