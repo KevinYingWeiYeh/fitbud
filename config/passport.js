@@ -2,7 +2,7 @@ var LocalStrategy    = require('passport-local').Strategy;
 var FacebookStrategy = require('passport-facebook').Strategy;
 try{
   var configAuth = require('./auth');
-} catch {
+} catch(err) {
   var configAuth = {
     'facebookAuth' : {
         'clientID'      : process.env.FBID, // your App ID
