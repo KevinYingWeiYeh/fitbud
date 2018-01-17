@@ -11,11 +11,16 @@ var flash = require('connect-flash');
 var cors = require('cors')
 
 var options = {
-  host: process.env.DBSERVER || 'localhost',
+  // host: process.env.DBSERVER || 'localhost',
+  // port: 3306,
+  // user: process.env.DBUSER || 'root',
+  // password: process.env.DBPASSWORD || 'root',
+  // database: process.env.DBNAME || 'fitbud',
+  host: 'wftuqljwesiffol6.cbetxkdyhwsb.us-east-1.rds.amazonaws.com',
   port: 3306,
-  user: process.env.DBUSER || 'root',
-  password: process.env.DBPASSWORD || 'root',
-  database: process.env.DBNAME || 'fitbud',
+  user: 'eharucdcns5wg72u',
+  password: 'b3pip6b93rwse6ku',
+  database: 'fgj254pi7i31ksss',
   checkExpirationInterval: 60000,
   expiration: 3600000,
 }
