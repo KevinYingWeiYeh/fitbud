@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-import { Container, Grid, Header, Image, Segment, Button, Transition, Label, Message, Checkbox, Radio, Sidebar, Menu, Icon} from 'semantic-ui-react';
+import { Container, Input as MapInput, Grid, Header, Image, Segment, Button, Transition, Label, Message, Checkbox, Radio, Sidebar, Menu, Icon} from 'semantic-ui-react';
 import { Form, Input, TextArea, Select } from 'formsy-semantic-ui-react';
 import _ from 'lodash';
+import FriendsInviteList from './FriendsInviteList.js';
 import PlacesAutocomplete, { geocodeByAddress, getLatLng } from 'react-places-autocomplete'
 // import { Card, Container, Icon, Image, List } from 'semantic-ui-react';
 
@@ -22,7 +23,8 @@ class CreateListing extends Component {
       level: ['Beginner','Intermediate','Advanced'],
       file: '',
       imagePreviewUrl: '',
-      address: 'San Francisco, CA'
+      address: 'San Francisco, CA',
+      invited: []
     };
 
     this.options = _.range(1, 11).map(num => {
@@ -35,14 +37,33 @@ class CreateListing extends Component {
 
     this.clickEImg = this.clickEImg.bind(this);
     this.setFile = this.setFile.bind(this);
-
-    this.onChange = (address) => this.setState({ address });
   }
 
   componentDidMount() {
     this.setState({
       visible: true
     });
+  }
+
+  handleAddressFocus = () => { !window.autocomplete && this.initializeAutocomplete(); }
+
+  handleAddressChange = (e) => {
+    this.setState({location: e.target.value});
+  }
+
+  initializeAutocomplete = () => {
+    console.log('initializeAutocomplete');
+    window.autocomplete = new google.maps.places.Autocomplete(document.getElementById('searchBox'));
+    // window.autocomplete.addListener('blur', (e) => {
+    //   console.log('listner triggered');
+    //   console.log(e);
+    //   // this.setState({location: e.value});
+    // });
+  }
+
+  addToInvite = (friend) => {
+    console.log(this.state.invited);
+    this.setState({invited: this.state.invited.concat([friend])});
   }
 
   toggleVisibility = (e) => {
@@ -61,10 +82,12 @@ class CreateListing extends Component {
   onValidSubmit = (formData) => {
     this.setState({submit: true});
     //formData.location = this.state.address;
+    formData.location = this.state.location;
     formData.currentLevel = this.state.currentLevel;
     formData.currentEvent = this.state.currentEvent;
     formData.private = this.state.private;
     formData.imgPath = this.state.file.name;
+    formData.invited = this.state.invited;
     formData.date = new Date(formData.date).toISOString().slice(0, 19).replace('T', ' ');
     console.log(formData);
     var options = {
@@ -132,16 +155,13 @@ class CreateListing extends Component {
     this.inputElement.click();
   }
 
-  componentDidMount() {
-    this.setState({visible: true})
-  }
-
   render() {
     // const inputProps = {
     //   value: this.state.address,
     //   onChange: this.onChange,
     // }
-    const autocomplete = new google.maps.places.Autocomplete((document.getElementById('searchBox')));
+    var {user, friends} = this.props;
+
     const styles = {
       root: {
         marginTop: 18,
@@ -153,6 +173,11 @@ class CreateListing extends Component {
         textAlign: 'center',
       },
     };
+
+    const locationInputStyle = {
+      width: '100%',
+      marginBottom: '10px'
+    }
 
     const errorLabel = <Label color="red" pointing/>;
 
@@ -180,24 +205,16 @@ class CreateListing extends Component {
     );
 
     const locationInput = (
-      <Input
+      <MapInput
         name="location"
-        placeholder="Workout location"
         type='text'
         icon="map"
         iconPosition="left"
-        required
-        //value={this.state.address}
         id='searchBox'
-        onChange={this.onChange}
-        // validations={{
-        //   isWords: true
-        // }}
-        // validationErrors={{
-        //   isDefaultRequiredValue: 'Location is required',
-        //   isWords: 'Only letters allowed for location'
-        // }}
-        // errorLabel={ <Label basic color='red' pointing /> }
+        placeholder="Enter a location"
+        style={locationInputStyle}
+        onFocus={this.handleAddressFocus}
+        onChange={this.handleAddressChange}
       />
     );
 
@@ -386,11 +403,11 @@ class CreateListing extends Component {
                 <Form.Group widths='equal'>
                   { meetupInput }
                   { dateInput }
-                </Form.Group >
+                </Form.Group>
                 <Form.Group widths='equal'>
                   { durationInput }
                   { buddiesInput }
-                </Form.Group >
+                </Form.Group>
                 <Segment >
                   { sectionInput }
                   <div style={{'padding':'20px'}}>
@@ -398,7 +415,7 @@ class CreateListing extends Component {
                       {
                         this.state.level.map((ele,index) =>
                           this.state.currentLevel === ele ?
-                          <Button key={index} passive onClick={this.handleLevelClick} style={{'background-color':'gray','color':'white'}}>{ele}</Button>
+                          <Button key={index} passive onClick={this.handleLevelClick} style={{'backgroundColor':'gray','color':'white'}}>{ele}</Button>
                           : <Button key={index} onClick={this.handleLevelClick}>{ele}</Button>
                         )
                       }
@@ -430,6 +447,7 @@ class CreateListing extends Component {
                         Friends List
                       </Header>
                       <div display='hidden' style={{'height':'565px','overflowY': 'auto', 'overflowX': 'hidden'}}>
+                        <FriendsInviteList user={user} friends={friends} addToInvite={this.addToInvite} />
                       </div>
                     </Segment>
                   </div>

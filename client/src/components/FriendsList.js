@@ -48,7 +48,7 @@ class FriendsList extends Component {
   handleClick = (index) => {
     this.setState({selected: this.props.friends[index]});
     var selected = this.state.selected;
-    if (!selected || (selected === this.props.friends[index])) {
+    if (!selected || (selected === this.props.friends[index]) || !this.state.showMessaging) {
       this.setState({showMessaging: !this.state.showMessaging});
     }
   }
@@ -69,7 +69,7 @@ class FriendsList extends Component {
       <Grid divided='vertically' style={friendsListStyle} verticalAlign='bottom'>
         <Grid.Row>
           <Grid.Column width={7}>
-            {(selected && showMessaging) ? <Messaging user={user} friend={selected} /> : <div></div>}
+            {(selected && showMessaging) && <Messaging user={user} friend={selected} />}
           </Grid.Column>
           <Grid.Column width={5}>
             <Card>
@@ -82,7 +82,7 @@ class FriendsList extends Component {
                 <Feed>
                   {friends.map((friend, index) =>
                     <Feed.Event key={index} onClick={() => this.handleClick(index)}>
-                      <Feed.Label image='elliot.jpg' />
+                      <Feed.Label image={friend.photo} />
                       <Feed.Content>
                         <Feed.Summary>
                           {friend.name}

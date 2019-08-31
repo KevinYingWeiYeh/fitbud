@@ -11,11 +11,16 @@ var flash = require('connect-flash');
 var cors = require('cors')
 
 var options = {
-  host: process.env.DBSERVER || 'localhost',
+  // host: process.env.DBSERVER || 'localhost',
+  // port: 3306,
+  // user: process.env.DBUSER || 'root',
+  // password: process.env.DBPASSWORD || 'root',
+  // database: process.env.DBNAME || 'fitbud',
+  host: 'wftuqljwesiffol6.cbetxkdyhwsb.us-east-1.rds.amazonaws.com',
   port: 3306,
-  user: process.env.DBUSER || 'root',
-  password: process.env.DBPASSWORD || '',
-  database: 'fitbud',
+  user: 'eharucdcns5wg72u',
+  password: 'b3pip6b93rwse6ku',
+  database: 'fgj254pi7i31ksss',
   checkExpirationInterval: 60000,
   expiration: 3600000,
 }
@@ -137,7 +142,7 @@ app.use('/profile', routeProfile);
 app.use('/friends', routeFriends);
 app.use('/subscription', routeSubscription);
 app.use('/workout', routeWorkout);
-app.use('/dashboard', routeDashboard);
+app.use('/dashboard', checkAuth, routeDashboard);
 app.use('/logout', routeLogout);
 
 // middleware function to check if this is one of the protected routes
@@ -147,7 +152,8 @@ function checkAuth(req, res, next) {
     next();
   }
   else {
-    res.status(401).json({});
+    res.redirect('/')
+    //res.status(401).json({});
   }
 }
 

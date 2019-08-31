@@ -14,17 +14,17 @@ class Messaging extends Component {
       loading: false
     }
 
-    this.firebase = window.firebase;
-    this.database = window.firebase.database();
+
+    this.database = window.firebase;
   }
 
   componentDidMount() {
     this.setState({sendDisabled: false});
     this.setState({visible: true});
     this.scrollToBottom();
-    setInterval(() => {
-      this.setState({message: this.state.messages});
-    }, 45000);
+    // setInterval(() => {
+    //   this.setState({message: this.state.messages});
+    // }, 45000);
 
     this.updateMessages(this.props.user, this.props.friend);
   }
@@ -50,9 +50,9 @@ class Messaging extends Component {
   }
 
   scrollToBottom = () => {
-    if (this.messageView) {
-      console.log(this.messageView);
-      this.messageView.scrollIntoView({ behavior: "smooth" });
+    var feed = document.getElementById('messageFeed');
+    if (feed) {
+      feed.scrollIntoView({ behavior: "smooth" });
     }
   }
 
@@ -90,8 +90,9 @@ class Messaging extends Component {
   }
 
   render() {
-    var { sendDisabled, messages, loading } = this.state;
-    // console.log('messsages', messages);
+    var { sendDisabled, messages, loading, input } = this.state;
+    var { friend, user } = this.props;
+    console.log('friend', friend);
 
     const messagingStyle = {
       height: '400px',
@@ -106,15 +107,15 @@ class Messaging extends Component {
           </Card.Header>
         </Card.Content>
         <Card.Content>
-          <Feed style={messagingStyle} ref={(el) => { this.messageView = el; }}>
+          <Feed id='messageFeed' style={messagingStyle}>
             {loading ?
               (<Dimmer active inverted>
                 <Loader inverted content='Loading' />
               </Dimmer>) :
               (messages.map((message, index) =>
                 <Feed.Event key={index} style={{marginTop: '5px'}}>
-                  {message.userId === (this.props.friend && this.props.friend.id) ? <Feed.Label image='elliot.jpg' /> : <div></div>}
-                  <Feed.Content style={{textAlign: message.userId === (this.props.user && this.props.user.id) ? 'right' : 'left',
+                  {(message.userId === (friend && friend.id)) && <Feed.Label image={friend.photo} />}
+                  <Feed.Content style={{textAlign: message.userId === (user && user.id) ? 'right' : 'left',
                                         marginRight: '10px'}}>
                     <Feed.Date content={moment(message.createdAt).fromNow()}/>
                     <Feed.Summary>
@@ -129,7 +130,7 @@ class Messaging extends Component {
         <Form onSubmit={this.handleSubmit}>
           <Input disabled={sendDisabled} action={{icon: 'send'}} fluid={true}
             placeholder='Message...' onChange={this.handleChange}
-            value={this.state.input} />
+            value={input} />
         </Form>
       </Card>]
     );

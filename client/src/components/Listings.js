@@ -13,8 +13,10 @@ class Listings extends Component {
     this.state = {
       visible: false,
       listings: [],
+      filtered: [],
       showModal: false,
       selectedListing: null,
+      subSelected: false,
       active: 'all',
       sorting: 'date',
     }
@@ -30,7 +32,8 @@ class Listings extends Component {
       .then(listings => {
 
         this.setState({listings: listings});
-          // listings.sort(this.listingsCompare)});
+        this.setState({filtered: listings});
+        // listings.sort(this.listingsCompare)});
 
         if ((this.props.modal !== null)) {
           var tempListing;
@@ -106,40 +109,63 @@ class Listings extends Component {
     this.props.doneEventSearch();
   }
 
+  filterSubscribed = () => {
+    fetch('/subscription', { credentials: "include" })
+      .then(response => response.json())
+      .then(subList => {
+        subList = subList.map(item => item.publisherId);
+        console.log(subList);
+        this.setState({filtered: this.state.listings.filter(listing => (
+          subList.includes(listing.ownerId)
+        ))})
+      });
+  }
+
+  toggleFilter = (filterName) => {
+    console.log(filterName);
+    if (filterName === 'all') {
+      this.setState({filtered: this.state.listings}); return;
+    }
+    var filterName = 'filter' + filterName[0].toUpperCase() + filterName.slice(1);
+    this[filterName]();
+  }
+
   handleContextRef = contextRef => this.setState({ contextRef })
 
   render() {
-    var { listings, showModal, selectedListing, contextRef } = this.state;
+    var { filtered, showModal, selectedListing, contextRef } = this.state;
 
     var cardGridCol = [[],[],[]];
-    for (var i = 0; i < listings.length; i++) {
+    for (var i = 0; i < filtered.length; i++) {
       cardGridCol[i%3].push((
         <ListingCard
-          listing={listings[i]}
+          listing={filtered[i]}
           showListingModal={this.showListingModal.bind(this)}
           key={i} />
       ));
     }
 
-    var cardGrid = listings.length !== 0 ? (
-      <Grid columns='equal'>
-        <Grid.Column>
-          {cardGridCol[0]}
-        </Grid.Column>
-        <Grid.Column>
-          {cardGridCol[1]}
-        </Grid.Column>
-        <Grid.Column>
-          {cardGridCol[2]}
-        </Grid.Column>
-      </Grid>
-    ) : null;
+    var cardGrid = filtered.length && (
+        <Grid columns='equal'>
+          <Grid.Column>
+            {cardGridCol[0]}
+          </Grid.Column>
+          <Grid.Column>
+            {cardGridCol[1]}
+          </Grid.Column>
+          <Grid.Column>
+            {cardGridCol[2]}
+          </Grid.Column>
+        </Grid>
+    );
 
     return ([
       <Transition visible={this.state.visible} duration={1000} animation='fade'>
 
         <Container style={{marginTop: '20px'}}>
-          <ListingNav user={this.props.user} updateSorting={this.updateSorting} updateActive={this.updateActive} active={this.state.active} sorting={this.state.sorting}/>
+          <ListingNav user={this.props.user} toggleFilter={this.toggleFilter}
+                      updateSorting={this.updateSorting} updateActive={this.updateActive}
+                      active={this.state.active} sorting={this.state.sorting}/>
           {cardGrid}
         </Container>
       </Transition>,
@@ -156,5 +182,3 @@ class Listings extends Component {
 }
 
 export default Listings;
-
-

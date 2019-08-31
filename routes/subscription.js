@@ -15,12 +15,14 @@ router.get('/', (req, res) => {
 router.post('/', (req, res) => {
   var {subscriberId, publisherId} = req.body;
   db.checkSubExist(subscriberId, publisherId, (dbResult) => {
-    if (!dbResult) {
+    console.log('posting to subscription');
+    if (!dbResult.length) {
       db.newSubscription(subscriberId, publisherId, (dbResult) => {
         console.log('database RESULTS>>:', dbResult);
         res.send(dbResult);
       })
     }
+    res.statusCode(409);
   })
 })
 

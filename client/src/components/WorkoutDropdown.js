@@ -11,7 +11,6 @@ class WorkoutDropdown extends Component {
       activeIndex: -1,
       requests: []
     };
-
     this.dropdown = this.dropdown.bind(this);
   }
 
@@ -21,6 +20,7 @@ class WorkoutDropdown extends Component {
     const newIndex = activeIndex === index ? -1 : index
 
     this.setState({ activeIndex: newIndex })
+
   }
 
   componentDidMount() {
@@ -32,9 +32,8 @@ class WorkoutDropdown extends Component {
         console.log('requests response #' + id, response);
         this.setState({ requests: response })
       })
-
-    console.log('getting posting requests');
   }
+
 
   render() {
     return (

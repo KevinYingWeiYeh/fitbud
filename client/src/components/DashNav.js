@@ -47,8 +47,11 @@ class DashNav extends Component {
         <Menu.Item name='my requests'
           active={this.props.view === 'my requests'}
           onClick={this.props.handleClick} />
-        <Menu.Item name='accepted requests'
-          active={this.props.view === 'accepted requests'}
+        <Menu.Item name='invites'
+          active={this.props.view === 'invites'}
+          onClick={this.props.handleClick} />
+        <Menu.Item name='friends'
+          active={this.props.view === 'friends'}
           onClick={this.props.handleClick} />
         <Menu.Item name='setting' position='right'>
 

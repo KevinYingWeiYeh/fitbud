@@ -4,9 +4,6 @@ import { Header, Segment, Input, Container, Image, List, Button, Form, TextArea 
 
 
 class Profile extends Component {
-  constructor(props) {
-    super(props);
-  }
   render() {
 
     // console.log('profile render', this.props.user);

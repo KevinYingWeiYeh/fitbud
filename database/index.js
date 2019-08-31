@@ -5,10 +5,15 @@ if (process.env.JAWSDB_URL){
   connection = mysql.createConnection(process.env.JAWSDB_URL);
 } else {
   connection = mysql.createConnection({
-    host: process.env.DBSERVER || 'localhost',
-    user: process.env.DBUSER || 'root',
-    password: process.env.DBPASSWORD || '',
-    database : 'fitbud'
+    // host: process.env.DBSERVER || 'localhost',
+    // user: process.env.DBUSER || 'root',
+    // password: process.env.DBPASSWORD || 'root',
+    // database : process.env.DBNAME || 'fitbud',
+    host: 'wftuqljwesiffol6.cbetxkdyhwsb.us-east-1.rds.amazonaws.com',
+    port: 3306,
+    user: 'eharucdcns5wg72u',
+    password: 'b3pip6b93rwse6ku',
+    database: 'fgj254pi7i31ksss',
   });
 }
 
@@ -166,7 +171,7 @@ var createWorkout = function(workoutObj, callback) {
 			console.log('error creating workout', err);
 		} else {
 			// console.log('created workout result:', result);
-			callback(result);
+			callback(err, result);
 		}
 	});
 };
@@ -229,6 +234,19 @@ var getUserRequestPostings = function(userId, callback) {
 	});
 };
 
+var getUserAllRequests = function(userId, callback) {
+//title, loation, date, duration
+	var query = 'select p.location,p.title,p.currentEvent, p.date, p.duration, p.details,r.status from requests r left join postings p on r.postingId = p.id where r.userId = ?';
+	connection.query(query, [userId], (err, result) => {
+		if (err) {
+			console.log('error getting requests by userId', err);
+		} else {
+			// console.log('success requests by userId:', result);
+			callback(result);
+		}
+	});
+};
+
 var createRequest = function(requestObj, callback) {
 	var query = 'INSERT INTO requests SET ?';
 	connection.query(query, requestObj, (err, result) => {
@@ -253,9 +271,9 @@ var createPair = function(requestObj, callback) {
 	});
 };
 
-var getUserAcceptPostings = function(userId, callback) {
-	var query = 'select p.location, p.currentEvent ,p.title, p.date, p.duration, p.details from requests r left join postings p on r.postingId = p.id where r.UserId = ? and r.status = ?';
-	connection.query(query, [userId, 'accept'], (err, result) => {
+var getUserInvitesPostings = function(userId, callback) {
+	var query = 'select p.location, p.currentEvent, p.title, p.date, p.duration, p.details, users.name from requests r left join postings p on r.postingId = p.id left join users on p.userId=users.id where r.UserId = ? and r.status = ?';
+	connection.query(query, [userId, 'invite'], (err, result) => {
 		if (err) {
 			console.log('error getting accepted requests', err);
 		} else {
@@ -266,9 +284,20 @@ var getUserAcceptPostings = function(userId, callback) {
 };
 
 
-var updateRequest = function(userId, callback) {
-	var query = "UPDATE requests SET STATUS = ? WHERE userId=?";
-	connection.query(query, ['accept', userId], (err, result) => {
+var updateRequestAccept = function(postingId, callback) {
+	var query = "UPDATE requests SET STATUS = ? WHERE postingId=?";
+	connection.query(query, ['accept', postingId], (err, result) => {
+		if (err) {
+			console.log('error updating reqest', err);
+		} else {
+			// console.log('updated request to accept!', result);
+			callback(result);
+		}
+	});
+};
+var updateRequestReject = function(postingId, callback) {
+	var query = "UPDATE requests SET STATUS = ? WHERE postingId=?";
+	connection.query(query, ['reject', postingId], (err, result) => {
 		if (err) {
 			console.log('error updating reqest', err);
 		} else {
@@ -304,7 +333,7 @@ var createFriendsRequest = function(originator, receiver, callback) {
 
 var updateFriendsNum = function(originator, receiver, callback) {
   var query = 'UPDATE users SET friendsNum = friendsNum + 1 WHERE (id=? OR id=?)';
-  connection.query(query, [options.description, options.id], (err, result) => {
+  connection.query(query, [originator, receiver], (err, result) => {
 		if (err) {
 			console.log('error updating friends number');
 		} else {
@@ -314,14 +343,16 @@ var updateFriendsNum = function(originator, receiver, callback) {
 	});
 }
 
-var updateFriendsRequest = function(originator, receiver, callback) {
-  var query = "UPDATE friends SET STATUS=? WHERE (originator=? AND receiver=?)";
-  connection.query(query, ['accept', originator, receiver], (err, result) => {
+var updateFriendsRequest = function(action, id, originator, receiver, callback) {
+  var query = "UPDATE friends SET STATUS=? WHERE id=?";
+  connection.query(query, [action, id], (err, result) => {
     if (err) {
       console.log('error updating friend request', err);
     } else {
       console.log('updated friends request to accept!', result);
-      this.updateFriendsNum(originator, receiver, (result) => console.log(result));
+      if(action==='accept') {
+        updateFriendsNum(originator, receiver, (result) => console.log(result));
+      }
       callback(result);
     }
   })
@@ -359,6 +390,7 @@ var checkSubExist = function(subscriberId, publisherId, callback) {
     if (err) {
       console.log('error checking subscription');
     } else {
+      console.log(result);
       callback(result);
     }
   })
@@ -471,13 +503,31 @@ var updateEventPic = function(title, username) {
 	});
 }
 
+var getFriendsRequests = function(userId, cb) {
+  var qForSent = 'select f.*, users.name, users.photo, users.description from friends f join users on f.receiver=users.id where status="pending" and originator=' + userId;
+  var qForReceived = 'select f.*, users.name, users.photo, users.description from friends f join users on f.originator=users.id where status="pending" and receiver=' + userId;
+  connection.query(qForSent, (err, result1) => {
+    if(err) throw err;
+    var response = {};
+    response.sent = result1;
+    connection.query(qForReceived, (err, result2) => {
+      if(err) throw err;
+      response.received = result2;
+      cb(response);
+    })
+  })
+}
+
 //insert into postings (title, location, date, duration, details, meetup_spot, buddies, userId) values ('hike', 'sf', '2017-01-01 00:00:00', 1, 'hike in muir woods', 'parking', 2, 1);
 
 module.exports = {
+  getFriendsRequests,
+  getUserAllRequests,
   updateDescription,
   findByFB,
   insertFBuser,
 	checkUser,
+  checkSubExist,
 	comparePassword,
 	createUser,
 	getWorkouts,
@@ -489,9 +539,10 @@ module.exports = {
 	getUserRequestPostings,
 	createRequest,
 	createPair,
-	getUserAcceptPostings,
+	getUserInvitesPostings,
 	getRequestsByPostingId,
-	updateRequest,
+	updateRequestAccept,
+  updateRequestReject,
   checkFriendsStatus,
   createFriendsRequest,
   updateFriendsRequest,

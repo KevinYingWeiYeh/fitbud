@@ -19,17 +19,17 @@ router.get('/all', (req, res) => {
 router.get('/requests', (req, res) => {
   var id = req.session.passport.user;
   // will need user id and workout posting id
-  db.getUserRequestPostings(id, (dbResult) => {
+  db.getUserAllRequests(id, (dbResult) => {
     res.send(dbResult);
   })
 })
 
 // all rows from accepted where userid = acceptUserid
 // click on accept button from eachPosting
-router.get('/accepted', (req,res) => {
+router.get('/invites', (req,res) => {
   var id = req.session.passport.user;
   // will need user id and workout posting id
-  db.getUserAcceptPostings(id, (dbResult) => {
+  db.getUserInvitesPostings(id, (dbResult) => {
     res.send(dbResult);
   })
 });

@@ -1,6 +1,16 @@
 var LocalStrategy    = require('passport-local').Strategy;
 var FacebookStrategy = require('passport-facebook').Strategy;
-var configAuth = require('./auth');
+try{
+  var configAuth = require('./auth');
+} catch(err) {
+  var configAuth = {
+    'facebookAuth' : {
+        'clientID'      : process.env.FBID, // your App ID
+        'clientSecret'  : process.env.FBS, // your App Secret
+        'callbackURL'   : process.env.FBCBURL,
+    }
+  };
+}
 var db = require('../database/index.js');
 
 module.exports = function(passport) {

@@ -7,10 +7,20 @@ var db = require('../database/index.js');
 //
 
 router.get('/', (req, res) => {
-  console.log('REACHED>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
+  // console.log('REACHED>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
   var id = req.session.passport.user;
   console.log('user id>>>>>>>>>>>:', id);
   db.getFriendsList(id, (dbResult) => {
+    // console.log('database RESULTS>>:', dbResult);
+    res.send(dbResult);
+  })
+})
+
+router.get('/requests', (req, res) => {
+  console.log('REACHED>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
+  var id = req.session.passport.user;
+  console.log('user id>>>>>>>>>>>:', id);
+  db.getFriendsRequests(id, (dbResult) => {
     console.log('database RESULTS>>:', dbResult);
     res.send(dbResult);
   })
@@ -27,7 +37,7 @@ router.post('/', (req, res) => {
     }
   })
 })
-// 
+//
 // router.get('/status', (req, res) => {
 //   console.log('REACHED>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
 //   var id = req.session.passport.user;
@@ -38,10 +48,10 @@ router.post('/', (req, res) => {
 //   })
 // })
 
-router.patch('/accept', (req, res) => {
+router.patch('/action', (req, res) => {
   // console.log('workout req query', req.params.id);
-  var {originator, receiver} = req.body;
-  db.updateFriendsRequest(originator, receiver, (result) => {
+  var {action, id, originator, receiver} = req.body;
+  db.updateFriendsRequest(action, id, originator, receiver, (result) => {
     //console.log('request created in the table', result);
     res.status(200).send('request accepted');
   });

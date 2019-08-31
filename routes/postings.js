@@ -52,12 +52,23 @@ router.post('/', (req, res) => {
     userId: req.user.id,
     private: req.body.private,
     currentEvent: req.body.currentEvent,
-    currentLevel: req.body.currentLevel,
+    currentLevel: req.body.currentLevel
   };
 
   db.createWorkout(workoutObj, (err, dbResult) => {
+    console.log(req.body.invited);
+    req.body.invited.forEach((user) => {
+      var reqObj = {
+        postingId: dbResult.insertId,
+        userId: user.id,
+        status: 'invite'
+      }
+      db.createRequest(reqObj, (result) => {
+        console.log('invited ' + user.name);
+      })
+    })
     res.status(201).send(dbResult);
-  });  
+  });
 });
 
 router.post('/pic', upload.single('file'), (req, res) => {
@@ -112,9 +123,18 @@ router.post('/:id', (req, res) => {
 router.patch('/accept/:id', (req, res) => {
   // console.log('workout req query', req.params.id);
   var id = req.params.id;
-  db.updateRequest(id, (result) => {
+  db.updateRequestAccept(id, (result) => {
     //console.log('request created in the table', result);
     res.status(200).send('request accepted');
+  });
+});
+
+router.patch('/reject/:id', (req, res) => {
+  // console.log('workout req query', req.params.id);
+  var id = req.params.id;
+  db.updateRequestReject(id, (result) => {
+    //console.log('request created in the table', result);
+    res.status(200).send('request rejected');
   });
 });
 

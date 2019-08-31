@@ -133,7 +133,7 @@ class App extends Component {
       width: '150px',
       height: '40px'
     }
-
+    console.log('DO I HAVE FRIENDS', this.state.friends);
     return (
       <Router>
         <div>
@@ -165,17 +165,18 @@ class App extends Component {
                 listings={data}
                 user={this.state.user}
                 fetchProfile={this.checkAuth}
+                getFriends={this.getFriends}
                 {...props}
               />
             )} />
 
             <Route exact path='/create' render={props => (
-              <CreateListing {...props} />
+              <CreateListing user={user} friends={friends} {...props} />
             )} />
 
           </Switch>
-          {user ? <Button onClick={this.toggleMessaging} style={buttonStyle}>Chat</Button> : <div></div>}
-          {messagingVisible ? <FriendsList user={user} friends={friends} /> : <div></div>}
+          {user && <Button onClick={this.toggleMessaging} style={buttonStyle}>Chat</Button>}
+          {(user && messagingVisible) && <FriendsList user={user} friends={friends} />}
         </div>
       </Router>
     );
